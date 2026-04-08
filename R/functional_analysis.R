@@ -2,9 +2,6 @@
 
 ##https://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp
 
-#library(Rmpfr)
-#library(fgsea)
-
 
 get_database <- function( database, folder ){
   
