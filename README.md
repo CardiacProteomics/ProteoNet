@@ -1,1 +1,1 @@
-# automated_functional_analysis
+# Automated functional analysis
