@@ -1,4 +1,4 @@
-# Proteonet: automated downstream functional analysis
+# ProteoNet: automated downstream functional analysis
 
 - Generate STRING network and perform ORA on subgroups
 - Perform ORA
