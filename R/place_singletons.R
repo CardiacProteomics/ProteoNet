@@ -1,4 +1,28 @@
-
+#' Assign singleton proteins to nearest subnetworks
+#'
+#' For proteins not assigned to any subnetwork ("singletons"), identifies their
+#' strongest interaction with proteins that are part of a cluster and assigns
+#' them to a nearby subnetwork context.
+#'
+#' This improves coverage of the network by linking isolated proteins to their
+#' most relevant neighbors based on interaction strength.
+#'
+#' @param df_out Data frame containing subnetwork membership assignments,
+#'   including a \code{cluster} column and STRING identifiers
+#' @param interactions Data frame of protein-protein interactions with columns
+#'   \code{from}, \code{to}, and \code{score}
+#' @param mapped_proteins Data frame mapping STRING IDs to gene or protein names
+#'
+#' @return A data frame with the following columns:
+#' \describe{
+#'   \item{ens_id}{STRING identifier of the singleton protein}
+#'   \item{gene_out}{Gene/protein name of the singleton}
+#'   \item{connection}{STRING ID of the strongest connected protein}
+#'   \item{connection_gene_out}{Gene/protein name of the connected protein}
+#'   \item{score}{Interaction score of the selected connection}
+#' }
+#'
+#' @export
 
 place_singletons <- function( df_out, interactions, mapped_proteins ){
   

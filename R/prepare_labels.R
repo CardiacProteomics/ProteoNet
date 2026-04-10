@@ -1,4 +1,23 @@
-
+#' Generate annotation labels for subnetworks
+#'
+#' Creates formatted text labels for each subnetwork (community), combining
+#' gene names and representative enrichment terms across databases.
+#'
+#' Labels are constructed using selected ORA results and are formatted for
+#' visualization, enabling concise interpretation of subnetwork functions.
+#'
+#' This corresponds to the labeling and annotation step in the ProteoNet pipeline.
+#'
+#' @param layout_fr A layout object containing node annotations, including
+#'   \code{community} and \code{gene_name}
+#' @param df_ora Data frame of enrichment results with selected representative terms,
+#'   including columns \code{community}, \code{database}, \code{category_cluster},
+#'   and \code{selected}
+#'
+#' @return A list of character vectors, where each element corresponds to a
+#'   subnetwork and contains formatted label text for visualization
+#'
+#' @export
 
 prepare_labels<- function(layout_fr, df_ora){
   

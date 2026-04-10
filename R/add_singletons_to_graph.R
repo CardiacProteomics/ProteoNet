@@ -1,3 +1,29 @@
+#' Add singleton proteins to the interaction graph
+#'
+#' Extends a filtered protein interaction network by adding singleton proteins
+#' and connecting them to their strongest interaction partners. Singleton edges
+#' are added with distinct styling to differentiate them from original network edges.
+#'
+#' The function also computes a layout for visualization and annotates nodes
+#' with gene names.
+#'
+#' This corresponds to the network augmentation and visualization preparation
+#' step in the ProteoNet pipeline.
+#'
+#' @param interaction_graph_filtered An igraph object representing the filtered network
+#' @param df_singleton Data frame of singleton assignments (e.g. from \code{place_singletons})
+#' @param df_out Data frame of subnetwork membership assignments
+#' @param mapped_proteins Data frame mapping STRING IDs to gene/protein names
+#' @param protein_highlight Character vector of proteins to highlight (currently unused)
+#'
+#' @return A list with the following elements:
+#' \describe{
+#'   \item{graph}{An igraph object including singleton nodes and edges}
+#'   \item{layout}{A ggraph layout object with node positions and annotations}
+#' }
+#'
+#' @export
+
 
 add_singletons_to_graph <- function(interaction_graph_filtered, df_singleton, df_out, mapped_proteins, protein_highlight){
   
@@ -29,8 +55,6 @@ add_singletons_to_graph <- function(interaction_graph_filtered, df_singleton, df
 
   for( i in 1:dim(df_singleton)[1]){
     
-    print(paste(df_singleton$ens_id[i], df_singleton$connection[i]))
-    
     interaction_graph_with_singletons <- igraph::add_edges(
       interaction_graph_with_singletons, 
       c(df_singleton$ens_id[i], df_singleton$connection[i]), 
@@ -41,8 +65,8 @@ add_singletons_to_graph <- function(interaction_graph_filtered, df_singleton, df
   }
 
   
-  E(interaction_graph_with_singletons)$linestyle[
-    is.na(E(interaction_graph_with_singletons)$linestyle)
+  igraph::E(interaction_graph_with_singletons)$linestyle[
+    is.na(igraph::E(interaction_graph_with_singletons)$linestyle)
   ] <- "solid"
   
   layout_fr <- ggraph::create_layout(

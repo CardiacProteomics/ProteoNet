@@ -23,7 +23,7 @@ identify_interactions <- function( proteins, string_database_location, species )
   string_db <- STRINGdb::STRINGdb$new(version="12", species=species, score_threshold=0, input_directory=string_database_location, link_data='detailed')
   mapped_proteins <- string_db$map(data.frame(protein = proteins), "protein", removeUnmappedRows = TRUE)
   all_interactions_in <- string_db$get_interactions(mapped_proteins$STRING_id)
-  interactions <- all_interactions_in %>% dplyr::distinct(from, to, .keep_all = TRUE)
+  interactions <- all_interactions_in |> dplyr::distinct(from, to, .keep_all = TRUE)
   
   interactions$score <- 1 - (1-interactions$coexpression/1000)*(1 - interactions$experimental/1000)*(1 - interactions$database/1000)
   
@@ -37,7 +37,7 @@ identify_interactions <- function( proteins, string_database_location, species )
     by.y = "protein_external_id"
   )
   
-  mapped_proteins <- map_temp %>%
+  mapped_proteins <- map_temp |>
     dplyr::select(-preferred_name, -protein_size)
   
   list(interactions=interactions, string_db = string_db, mapped_proteins = mapped_proteins)

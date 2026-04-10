@@ -1,14 +1,37 @@
+#' Assign genes to subnetwork communities
+#'
+#' Maps a set of genes or proteins to STRING identifiers and assigns each
+#' to a subnetwork (community) based on precomputed community detection results.
+#'
+#' Genes that are not present in the STRING network or not assigned to a
+#' community are labeled accordingly.
+#'
+#' This corresponds to the mapping step between input genes and subnetworks
+#' in the ProteoNet pipeline.
+#'
+#' @param proteins Character vector of gene or protein identifiers
+#' @param interactions Data frame of protein-protein interactions (unused but kept for pipeline consistency)
+#' @param communities Community detection result (e.g. from \code{igraph::cluster_louvain})
+#' @param mapped_proteins Data frame mapping gene/protein names to STRING IDs
+#'
+#' @return A data frame with the following columns:
+#' \describe{
+#'   \item{cluster}{Assigned community (or "not_in_cluster")}
+#'   \item{gene}{Input gene or protein identifier}
+#'   \item{string_name}{Corresponding STRING identifier (or annotated missing value)}
+#' }
+#'
+#' @export
 
 
 
-
-assign_subnetwork_membership <- function(my_geneset, interactions, communities, string_db, mapped_proteins){
+assign_subnetwork_membership <- function(proteins, interactions, communities, mapped_proteins){
 
   ens2membership <- setNames( communities$membership, communities$names )
   
   results <- list()  
 
-  for(gene in my_geneset){
+  for(gene in proteins){
     
     ens_ids <- mapped_proteins$STRING_id[mapped_proteins$protein==gene]
     

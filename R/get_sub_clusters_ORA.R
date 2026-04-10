@@ -1,4 +1,31 @@
-
+#' Cluster enriched pathways based on gene set overlap
+#'
+#' Groups enriched pathways into clusters based on their pairwise overlap,
+#' using hierarchical clustering and adaptive splitting of the dendrogram.
+#'
+#' Clusters are defined such that pathways within a cluster satisfy specified
+#' overlap criteria, enabling reduction of redundant enrichment terms.
+#'
+#' This corresponds to the redundancy reduction step in the ProteoNet pipeline.
+#'
+#' @param M A square overlap matrix (e.g. from \code{get_overlap_matrix}),
+#'   with pathways as rows and columns
+#' @param df_fa_in Data frame of enrichment results containing pathway-level
+#'   statistics (e.g. p-values, gene counts)
+#' @param threshold_mean Minimum mean overlap required within a cluster
+#' @param threshold_min Minimum pairwise overlap required within a cluster
+#'
+#' @return A data frame with pathway clustering results, including:
+#' \describe{
+#'   \item{pw}{Pathway name}
+#'   \item{cluster}{Assigned cluster identifier}
+#'   \item{fdr}{Adjusted p-value (Benjamini-Hochberg)}
+#'   \item{set_size}{Size of the gene set}
+#'   \item{set_size_in_universe}{Size of the gene set within the universe}
+#'   \item{genes_in_set}{Number of overlapping genes}
+#' }
+#'
+#' @export
 
 get_sub_clusters_ORA <- function( M, df_fa_in, threshold_mean, threshold_min ){
   
