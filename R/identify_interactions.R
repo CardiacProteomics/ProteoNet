@@ -1,11 +1,27 @@
+#' Build a protein-protein interaction network from STRING
+#'
+#' Constructs a protein interaction network using a locally downloaded
+#' STRING database for the specified species.
+#'
+#' This corresponds to the network construction step in the ProteoNet pipeline.
+#'
+#' @param proteins Character vector of gene or protein identifiers
+#' @param string_database_location Path to the folder containing STRING data
+#' @param species Numeric species identifier (e.g. 9606 for Homo sapiens)
+#'
+#' @return A list with the following elements:
+#' \describe{
+#'   \item{interactions}{Object with protein-protein interactions}
+#'   \item{string_object}{STRING database object used for mapping}
+#'   \item{mapping}{Data frame mapping STRING IDs to gene symbols}
+#' }
+#' @export
 
-library(igraph)
-library(ggraph)
 
-identify_interactions <- function( my_geneset, string_database_location, species ){
+identify_interactions <- function( proteins, string_database_location, species ){
   
   string_db <- STRINGdb::STRINGdb$new(version="12", species=species, score_threshold=0, input_directory=string_database_location, link_data='detailed')
-  mapped_proteins <- string_db$map(data.frame(protein = my_geneset), "protein", removeUnmappedRows = TRUE)
+  mapped_proteins <- string_db$map(data.frame(protein = proteins), "protein", removeUnmappedRows = TRUE)
   all_interactions_in <- string_db$get_interactions(mapped_proteins$STRING_id)
   interactions <- all_interactions_in %>% dplyr::distinct(from, to, .keep_all = TRUE)
   
