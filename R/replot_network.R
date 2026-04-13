@@ -26,102 +26,99 @@
 #'
 #' @export
 
-  
-  
-replot_network <- function(layout_fr, folder_results, network_height, network_width, label_size, legend_size, labels){
-  
-highlight <- layout_fr$highlight
+
+
+replot_network <- function(layout_fr, folder_results, network_height, network_width, label_size, legend_size, labels, reference){
+
+#highlight <- layout_fr$highlight
 community <- layout_fr$community
 
-if(length(highlight)>0){
-  
-  
-  lvls <- levels(as.factor(layout_fr$community))
-  keep <- labels != "\n\n" & !is.na(labels)
-  
-  g <- attr(layout_fr, "graph")
-  
-  igraph::E(g)$linestyle <- factor(
-    igraph::E(g)$linestyle,
-    levels = c( "solid", "dashed" )
-  )
-  
-  attr(layout_fr, "graph") <- g
-  
+lvls <- levels(as.factor(layout_fr$layout$community))
+keep <- labels != "\n\n" & !is.na(labels)
 
-  
-  highlight <- layout_fr$highlight
+g <- attr(layout_fr$layout, "graph")
+
+igraph::E(g)$linestyle <- factor(
+  igraph::E(g)$linestyle,
+  levels = c( "solid", "dashed" )
+)
+
+attr(layout_fr$layout, "graph") <- g
+
+#highlight <- layout_fr$layout[["highligt"]]
+
+highlight <- NULL
+
+if(length(highlight)>0){
+
   g_figure <- ggraph::ggraph(layout_fr) +
-    ggraph::geom_edge_link(edge_colour = "black", aes(edge_linetype = linestyle)) + 
+    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
     ggraph::scale_edge_linetype_manual(
-      name   = "Edge type",  
+      name   = "Edge type",
       breaks = c("solid", "dashed"),
       values = c(
         solid  = "solid",
         dashed = "dashed"
-      ), 
+      ),
       labels = c(
-        solid = "Network", 
+        solid = "Network",
         dashed = "Singleton"
       )
     )+
-    
+
     # Outer ring: LMB1
-    
+
     ggraph::geom_node_point(
-      aes(fill  = as.factor(community)),
+      ggplot2::aes(fill  = as.factor(community)),
       color = "black",
       size  = 4,
       shape = 21,
       stroke = ifelse(layout_fr$highlight, 3, 0),
       #show.legend = FALSE
-    ) + 
-    ggplot2::theme_bw() + 
+    ) +
+    ggplot2::theme_bw() +
     ggplot2::theme(
       legend.text  = ggplot2::element_text(size = legend_size),
       legend.title = ggplot2::element_text(size = legend_size)
     )
-  
-  g_figure <- g_figure + 
+
+  g_figure <- g_figure +
     ggplot2::scale_fill_discrete(
       name   = "",
-      labels = labels[keep], 
+      labels = labels[keep],
       breaks = lvls[keep]
     )
-  
 
-  
-  
+
 }else{
-  g_figure <- ggraph::ggraph(layout_fr)  + 
-    ggraph::geom_edge_link(edge_colour = "black", aes(edge_linetype = linestyle)) +
+  g_figure <- ggraph::ggraph(layout_fr$layout)  +
+    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
     ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
     ggplot2::theme_bw()
-  
-  g_figure <- g_figure + 
+
+  g_figure <- g_figure +
     ggplot2::scale_color_discrete(
       name   = "",
-      labels = labels[keep], 
+      labels = labels[keep],
       breaks = lvls[keep]
     )
 }
 
-g_figure2 <- g_figure + 
-  geom_node_text(
-    aes(label = gene_name),
+g_figure2 <- g_figure +
+  ggraph::geom_node_text(
+    ggplot2::aes(label = gene_name),
     repel = TRUE,        # avoids text overlapping
     size = label_size
   )
 
 
-ggsave( plot = g_figure, filename = paste0(folder_results, "/ppi_network_replot_", reference, ".png"), width = network_width, height = network_height )
-ggsave( plot = g_figure2, filename = paste0(folder_results, "/ppi_network_with_labels_replot_", reference, ".png"), width = network_width, height = network_height )
+ggplot2::ggsave( plot = g_figure, filename = paste0(folder_results, "/ppi_network_replot_", reference, ".png"), width = network_width, height = network_height )
+ggplot2::ggsave( plot = g_figure2, filename = paste0(folder_results, "/ppi_network_with_labels_replot_", reference, ".png"), width = network_width, height = network_height )
 
 
 }
-  
 
 
 
 
-  
+
