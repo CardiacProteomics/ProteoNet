@@ -22,19 +22,19 @@
 
 get_database <- function( database, folder ){
 
-  if(database == 'gobp'){
-    pathways <- fgsea::gmtPathways(paste0(folder, "/Gene_set_databases/c5.go.bp.v2025.1.Hs.symbols.gmt"))
+  if(database == 'gobp_mouse'){
+    pathways <- fgsea::gmtPathways(paste0(folder, "/Gene_set_databases/m5.go.bp.v2024.1.Mm.symbols.gmt"))
   }
 
-  if(database == 'gocc'){
-    pathways <- fgsea::gmtPathways(paste0(folder, "/Gene_set_databases/c5.go.cc.v2025.1.Hs.symbols.gmt"))
+  if(database == 'gocc_mouse'){
+    pathways <- fgsea::gmtPathways(paste0(folder, "/Gene_set_databases/m5.go.cc.v2024.1.Mm.symbols.gmt"))
   }
 
-  if(database == 'gomf'){
+  if(database == 'gomf_mouse'){
     pathways <- fgsea::gmtPathways(paste0(folder, "/Gene_set_databases/m5.go.mf.v2024.1.Mm.symbols.gmt"))
   }
 
-  if(database == 'reactome'){
+  if(database == 'reactome_mouse'){
     pathways <- fgsea::gmtPathways(paste0(folder, "/Gene_set_databases/m2.cp.reactome.v2024.1.Mm.symbols.gmt"))
   }
 
