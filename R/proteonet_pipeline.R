@@ -41,7 +41,8 @@ proteonet_pipeline <- function( reference,
                  databases_tested,
                  ora_min,
                  ora_max,
-                 folder_databases,
+                 folder_string,
+                 folder_genesets,
                  folder_results,
                  folder_figures,
                  universe,
@@ -51,7 +52,7 @@ proteonet_pipeline <- function( reference,
 
 
   out_ii <- identify_interactions( genes_drawn,
-                                   folder_databases,
+                                   folder_string,
                                    species )
 
   out_cn <- construct_network( out_ii$interactions,
@@ -73,6 +74,7 @@ proteonet_pipeline <- function( reference,
                                       df_asm,
                                       out_ii$mapped_proteins)
 
+
   df_gcr <- get_community_representatives( out_astg$layout,
                                            universe,
                                            selection,
@@ -81,7 +83,8 @@ proteonet_pipeline <- function( reference,
                                            threshold_min,
                                            ora_min,
                                            ora_max,
-                                           folder_databases)
+                                           folder_genesets)
+
 
   write.csv(df_gcr, file = paste0(folder_results, "/overrepresentation_analysis_alt_", reference, ".csv"))
   labels <- prepare_labels(out_astg$layout, df_gcr)
