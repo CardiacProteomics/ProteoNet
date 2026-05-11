@@ -24,7 +24,7 @@
 #'
 #' @export
 
-place_singletons <- function( df_out, interactions, mapped_proteins, min_score = 0 ){
+place_singletons <- function( df_out, interactions, mapped_proteins, min_score ){
 
   ens_singletons <- df_out[df_out$cluster=='not_in_cluster', ]$string_name
   ens_in_cluster <- df_out[!df_out$cluster=='not_in_cluster', ]$string_name
