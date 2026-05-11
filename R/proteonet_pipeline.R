@@ -70,7 +70,7 @@ proteonet_pipeline <- function( reference,
   df_ps <- place_singletons(  df_asm,
                               out_ii$interactions,
                               out_ii$mapped_proteins, 
-                              singleton_treshold, min_score )
+                              min_score )
 
   out_astg <- add_singletons_to_graph(out_cn$graph,
                                       df_ps,
