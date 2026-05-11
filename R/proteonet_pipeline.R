@@ -37,6 +37,7 @@ proteonet_pipeline <- function( reference,
                  species,
                  min_cluster_size,
                  score_threshold,
+                  singleton_threshold, 
                  selection,
                  databases_tested,
                  ora_min,
@@ -67,7 +68,8 @@ proteonet_pipeline <- function( reference,
 
   df_ps <- place_singletons(  df_asm,
                               out_ii$interactions,
-                              out_ii$mapped_proteins  )
+                              out_ii$mapped_proteins, 
+                              singleton_treshold  )
 
   out_astg <- add_singletons_to_graph(out_cn$graph,
                                       df_ps,
