@@ -45,21 +45,12 @@ library(ProteoNet)
 
 ---
 
-# Workflow overview
+# Workflow 
+Prior to running the analysis, the following databases should be downloaded: 
+- Gene Ontology database or Reactome. Located in the variable folder_genesets.
+- The STRING database for species of interest
 
-A typical `ProteoNet` workflow consists of:
-
-1. Preparing a list of proteins with associated statistics
-2. Constructing a protein interaction network
-3. Filtering interactions by confidence score
-4. Detecting network clusters
-5. Performing pathway enrichment analysis
-6. Removing redundant pathways
-7. Visualizing the resulting network
-
----
-
-# Example workflow
+Then just run the analysis: 
 
 ```r
 # Run the full ProteoNet analysis pipeline
