@@ -70,8 +70,22 @@ place_singletons <- function( df_out, interactions, mapped_proteins, min_score )
 
   }
 
-  df_singleton <- do.call(rbind, results)
+  df_singleton <- if(length(results) > 0){
 
-  return(na.omit(df_singleton))
+  do.call(rbind, results)
+
+} else {
+
+  data.frame(
+    ens_id = character(0),
+    gene_out = character(0),
+    connection = character(0),
+    connection_gene_out = character(0),
+    score = numeric(0)
+  )
+
+}
+
+return(na.omit(df_singleton))
 }
 
