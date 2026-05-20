@@ -6,7 +6,7 @@ output: html_document
 ---
 
 
-```{r Automate proteonet pipeline, include=FALSE}
+```{r Automated proteonet pipeline, include=FALSE}
 library(openxlsx)
 library(ProteoNet)
 
