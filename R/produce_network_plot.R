@@ -44,7 +44,7 @@ produce_network_plot <- function( layout_fr, labels ){
   }
   
   g_figure <- ggraph::ggraph(layout_fr)  + 
-    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
+    edge_geom +
     ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
     ggplot2::theme_bw()+ 
     ggraph::scale_edge_linetype_manual(
