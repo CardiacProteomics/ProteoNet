@@ -92,7 +92,7 @@ res2 <- replot_network(
   label_size = 3,                # Size of node labels
   legend_size = 4,               # Size of legend text
   unlist(res$labels),            # Labels extracted from pipeline output
-  reference                      # Original reference data frame
+  reference                      # Label for saving output
 )
 ```
 
