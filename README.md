@@ -48,7 +48,7 @@ library(ProteoNet)
 # Workflow 
 Prior to running the analysis, the following databases should be downloaded: 
 - Gene Ontology database or Reactome. Located in the variable folder_genesets.
-- The STRING database for species of interest
+- The STRING database for species of interest located in folder_string.
 
 Then just run the analysis: 
 
