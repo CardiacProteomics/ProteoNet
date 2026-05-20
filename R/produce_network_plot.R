@@ -23,7 +23,26 @@
 
 produce_network_plot <- function( layout_fr, labels ){
 
+  edge_df <- ggraph::get_edges()(layout_fr)
 
+  has_linestyle <- "linestyle" %in% colnames(edge_df)
+
+  if(has_linestyle){
+
+    edge_geom <- ggraph::geom_edge_link(
+      edge_colour = "black",
+      ggplot2::aes(edge_linetype = linestyle)
+    )
+
+  } else {
+
+    edge_geom <- ggraph::geom_edge_link(
+      edge_colour = "black",
+      linetype = "solid"
+    )
+
+  }
+  
   g_figure <- ggraph::ggraph(layout_fr)  + 
     ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
     ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
