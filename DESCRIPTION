@@ -8,5 +8,15 @@ License: "use_gpl3_license()"
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Imports: MASS, dplyr, ggraph, igraph, tidyr, ggplot2
 
+Depends:
+    R (>= 4.5)
+
+Imports:
+    dplyr,
+    ggplot2,
+    ggraph,
+    igraph,
+    MASS,
+    STRINGdb (>= 2.20.0),
+    tidyr
