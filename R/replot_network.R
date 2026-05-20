@@ -120,8 +120,8 @@ g_figure2 <- g_figure +
   )
 
 
-ggplot2::ggsave( plot = g_figure, filename = paste0(folder_results, "/ppi_network_replot_", reference, ".png"), width = network_width, height = network_height )
-ggplot2::ggsave( plot = g_figure2, filename = paste0(folder_results, "/ppi_network_with_labels_replot_", reference, ".png"), width = network_width, height = network_height )
+ggplot2::ggsave( plot = g_figure, filename = paste0(folder_results, "/replot_ppi", reference, ".png"), width = network_width, height = network_height )
+ggplot2::ggsave( plot = g_figure2, filename = paste0(folder_results, "/replot_ppi_with_labels_", reference, ".png"), width = network_width, height = network_height )
 
 
 }
