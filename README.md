@@ -96,22 +96,7 @@ res2 <- replot_network(
 )
 ```
 
----
 
-# Input data
-
-`ProteoNet` expects a data frame containing protein or gene identifiers together with statistics from a proteomics analysis.
-
-Typical columns include:
-
-| Column | Description                        |
-| ------ | ---------------------------------- |
-| gene   | Gene symbol or protein identifier  |
-| logFC  | Fold change or effect size         |
-| pvalue | Raw p-value                        |
-| fdr    | Multiple testing corrected p-value |
-
-The package is designed to integrate naturally with outputs from common proteomics workflows.
 
 ---
 
@@ -144,7 +129,7 @@ The package uses `ggplot2` and `ggraph` for customizable and publication-quality
 Visualization features include:
 
 * Cluster-aware network layouts
-* Node coloring by fold change or cluster
+* Node coloring by cluster
 * Highlighting of singleton proteins
 * Edge styling based on interaction type
 * Automatic pathway labeling
@@ -179,20 +164,6 @@ Citation information coming soon.
 
 `ProteoNet` is under active development. Contributions, feature requests, and bug reports are welcome.
 
----
-
-# Contributing
-
-Contributions are welcome.
-
-To contribute:
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Open a pull request
-
----
 
 # Issues and bug reports
 
