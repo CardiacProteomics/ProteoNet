@@ -27,6 +27,8 @@ construct_network <- function( interactions, min_cluster_size, score_threshold, 
   edges <- interactions |> dplyr::select(from = from, to = to, score = score)
   
   interaction_graph <- tidygraph::tbl_graph(edges = edges, directed = FALSE)
+
+  igraph::E(interaction_graph)$linestyle <- "solid"
   
   comp <- igraph::components(interaction_graph)
   
