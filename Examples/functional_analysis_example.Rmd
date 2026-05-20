@@ -5,372 +5,59 @@ date: "2025-11-17"
 output: html_document
 ---
 
-```{r import all necessary functions, include=FALSE}
 
-function_sources <- list.files("R", full.names = TRUE)
-for(f in function_sources[!grepl("LICENSE", function_sources)]){
-  source(f)
-}
+```{r Automate proteonet pipeline, include=FALSE}
+library(openxlsx)
+library(ProteoNet)
 
-threshold_mean <- 0.9
-threshold_min <- 0.0
+folder_genesets <- ".../Gene_set_databases" #add directions for databases
+df_de <- read.xlsx(".../differential_expression.xlsx")
+universe <- df_de$Gene
+universe <- universe[universe != ""]
 
-```
+my_geneset <- df_de$Gene[df_de$logFC>=1 & df_de$fdr<=0.01]
+my_geneset <- na.omit(my_geneset[my_geneset != ""])
+my_geneset <- unique(my_geneset)
+my_geneset <- sub(";.*", "", my_geneset)
 
-```{r run ORA analysis, include=FALSE}
-
-folder_databases <- ".../automated-functional-analysis"
-folder_results <- ".../Results"
-
-df_in_new <- read.csv(".../report.pg_matrix.tsv", sep='\t')
-universe <- unique(df_in_new$Genes)
-
-df_results <- openxlsx::read.xlsx(".../tPKP2_proteomics_results_RV.xlsx")
-
-df_delta <- df_results[(df_results$cluster_fc06=="delta") & !is.na(df_results$cluster_fc06), ]
-
-my_geneset <- df_delta$gene
-
-databases_tested <- list("gobp", "gocc", "reactome")
-
-min_cluster <- 4
-ora_min <- 4
-ora_max <- 300
-reference <- "test"
-string_score_threshold <- 0.4
-singleton_threshold <- 0.5
-network_height <- 10
-network_width <- 10
+reference <- "test_analysis"
 species <- 10090
-
-
-results <- automated_functional_analysis( my_geneset, 
-                               universe, 
-                               threshold_mean, 
-                               threshold_min, 
-                               databases_tested, 
-                               min_cluster, 
-                               species, 
-                               ora_min, 
-                               ora_max, 
-                               folder_databases,
-                               folder_results,
-                               reference, 
-                               string_score_threshold,
-                               singleton_threshold,
-                               network_height, 
-                               network_width,
-                               protein_highlight = c()  )
-
-
-
-```
-
-
-
-```{r run ORA analysis, include=FALSE}
-
-### Your geneset 
-
-my_geneset <- c("PKP3","DSC1","DSG2","DSG3","DSP","GRHL1","JUP", "TMEM242","UQCRFS1","TMEM223","FASTKD3","UQCC3","NDUFAF5")
-
-
-universe <- toupper(unique(df_in_new$Genes))
-
-### Get database (Alternatively, add your own in .gmt format and imported using fgsea::gmtPathways)
-
-database <- get_database("gobp_human")
-
-### Run ORA on your geneset 
-
-ora_results <- genes_ORA( my_geneset, universe, database, 3, 100)
-
-### Significant ORA results
-
-ora_sig <- ora_results[ora_results$pv_bh<=0.05, ]
-
-#save examples "D:/Function_for_functional_analysis/examples"
-
-write.xlsx(ora_sig[, c("functional_category", "pv", "geneset_drawn")], file = "D:/Function_for_functional_analysis/examples/ora_sig.xlsx")
-
-```
-
-```{r get overlap between genesets, include=FALSE}
-
-### Get matrix of pairwise overlap between genesets
-overlap_matrix <- get_overlap_matrix( ora_sig$functional_category, database )
-
-
-
-
-### pheatmap -> dendrogram -> dendrogram with colors following algorithm
-
-
-### Get image of matrix and calculate dendrogram. You can change clustering algorithm, but here we use Ward.D2. 
-ph <- pheatmap::pheatmap(overlap_matrix, show_colnames = T, show_rownames = F, clustering_method = "ward.D2", filename = ".../examples/pheatmap1.png")
-ph <- pheatmap::pheatmap(overlap_matrix, show_colnames = F, show_rownames = F, clustering_method = "ward.D2", filename = ".../examples/pheatmap2.png")
-
-#png("D:/Function_for_functional_analysis/examples/dendrogram.png", width=1200, height=800)
-#plot(ph$tree_row, main = "Row Dendrogram")
-#dev.off()
-
-
-
-
-###
-ora_subclusters <- get_sub_clusters_ORA( overlap_matrix, ora_sig, 0.9, 0 )
-
-ora_sig$cluster <- ora_subclusters$cluster
-
-write.xlsx(ora_sig[, c("functional_category", "pv", "geneset_drawn", "cluster")], file = ".../examples/ora_sig_subclusters.xlsx")
-
-
-
-hc <- ph$tree_row  
-library(dendextend)
-dend <- as.dendrogram(hc)
-subcluster <- ora_sig$cluster
-#subcluster_colors <- as.numeric(factor(subcluster))
-
-dend <- dend %>% set("branches_lwd", 6)
-  
-dend_colored <- dendextend::color_branches(
-  dend,
-  clusters = factor(subcluster)
-)  
-
-#abels_colors(dend) <- subcluster_colors
-
-dend2 <- hang.dendrogram(dend_colored, hang = 2)
-
-png("D:/Function_for_functional_analysis/examples/dendrogram_subclusters.png", width=1200, height=1200)
-
-plot(dend2,
-     labels_cex = 1.2)
-dev.off()
-
-ora_reduced <- ora_sig %>%
-  group_by(cluster) %>% 
-  slice_min(pv)
-
-write.xlsx(ora_reduced[, c("functional_category", "pv", "geneset_drawn", "cluster")], file = ".../examples/ora_reduced.xlsx")
-
-
-```
-
-
-```{r construct a STRING network, include=FALSE}
-
-library(dplyr)
-
-
-string_database_location <- "String"
-species <- 10090
-
-interactions <- identify_interactions( my_geneset, string_database_location, species, mapped_proteins) 
-
-
-res <- construct_network( interactions, min_cluster = 5 )
-
-
-communities <- res$communities
-interaction_graph_filtered <- res$graph
-
-
-```
-
-```{r construct a STRING network, include=FALSE}
-
-res <- assign_subnetwork_membership(my_geneset, interactions, communities)
-
-df_out <- res$df_out
-mapped_proteins <- res$mapped_proteins
-  
-#write.xlsx(df_out, paste0("D:/Project_tPKP2/Results/trajectory_clusters_with_singletons/subclusters_v4_",letter,".xlsx"))
-
-
-
-```
-
-
-```{r construct a STRING network, include=FALSE}
-
-### find a home for the singletons 
-
-df_singleton <- place_singletons( df_out, mapped_proteins )
-
-
-```
-
-
-
-```{r plot network, include=FALSE}
-
-
-
-layout_fr  <- ggraph::create_layout(interaction_graph_filtered, layout = 'fr')
-
-
-db_gobp <- get_database("gobp")
-db_gocc <- get_database("gocc")
-db_reac <- get_database("reactome")
-
-
-databases_tested <- c(db_gobp, db_gocc, db_reac)
-
+min_cluster_size <- 3
+score_threshold <- 0.4
 selection <- "fdr"
-singleton_threshold <- 0.5
-
-cat_sub <- identify_category_subclusters(communities, df_singleton, singleton_threshold = 0.5)
-databases_tested <- list(db_gobp, db_gocc, db_reac)
-df_ora <- get_community_representatives( cat_sub, selection, databases_tested )
-labels <- prepare_labels(cat_sub, df_ora)
-
-
-names(labels) <- levels(as.factor(layout_fr$community))
-
-g_figure <- ggraph::ggraph(layout_fr)  + 
-  ggraph::geom_edge_link(edge_colour = 'black') +
-  ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
-  ggplot2::theme_bw()
-
-g_figure <- g_figure + 
-  ggplot2::scale_color_discrete(
-  name   = "Significant gene sets from each database",
-  labels = labels
-)
+databases_tested <- c("gocc_mouse", "gobp_mouse")
+ora_min <- 3
+ora_max <- 500
+folder_string<- ".../String" #add directions for databases 
+folder_genesets <- ".../Gene_set_databases" #add directions for databases 
+folder_results <- ".../results" #add directions for results
+folder_figures <- ".../figures" #add directions for figures
+threshold_mean <- 0.7
+threshold_min <- 0.0
+min_score <- 0.4
 
 
-ggplot2::ggsave("D:/Function_for_functional_analysis/examples/network.png", width=14, height=10)
-  
+res <- proteonet_pipeline( 
+                 reference,
+                 my_geneset,
+                 species,
+                 min_cluster_size, 
+                 score_threshold, 
+                 selection, 
+                 databases_tested, 
+                 ora_min, 
+                 ora_max, 
+                 folder_string, 
+                 folder_genesets, 
+                 folder_results, 
+                 folder_figures, 
+                 universe, 
+                 threshold_mean, 
+                 threshold_min, 
+                 min_score
+                 )
 
-```
-
-
-```{r run ORA analysis, include=FALSE}
-
-#pathways <- fgsea::gmtPathways("....")
-
-
-genes1 <- db_gocc$GOCC_INTERCALATED_DISC
-genes2 <- db_gocc$GOCC_DESMOSOME
-
-intersect(genes1, genes2)
-
-c <- length(intersect(genes1, genes2))/min(c(length(genes1), length(genes2)))
-
-
-r <- get_overlap_matrix(  df_ora[df_ora$community==2 & df_ora$database=="GOCC", ]$functional_category, db_gocc )
-
+replot_network(res$network, folder_figures, network_height = 10, network_width = 10, label_size = 4, legend_size = 4, unlist(res$labels), reference)
 
 ```
 
-
-```{r run ORA analysis, include=FALSE}
-
-min_cluster <- 5
-
- string_database_location <- "String"
-  species <- 10090
-  
-  interactions <- identify_interactions( my_geneset, string_database_location, species)  
-  res <- construct_network( interactions, min_cluster )
-  
-  
-  communities <- res$communities
-  interaction_graph_filtered <- res$graph
-  
-  mapped_proteins <- string_db$map(data.frame(protein = my_geneset), "protein", removeUnmappedRows = TRUE)
-  
-  # Find singletons 
-  all_stringID <- c(interactions$from, interactions$to) 
-  all_stringID_unique <- unique(all_stringID)
-  
-  genes_in_network <- c()
-  network_membership <- c()
-  df_out <- res$df_out
-  mapped_proteins <- res$mapped_proteins
-  df_singleton <- place_singletons( df_out )
-  
-  layout_fr  <- ggraph::create_layout(interaction_graph_filtered, layout = 'fr')
-  
-  
-  selection <- "fdr"
-  singleton_threshold <- 0.5
-  
-  cat_sub <- identify_category_subclusters(communities, df_singleton, singleton_threshold = 0.5)
-  df_ora <- get_community_representatives( cat_sub, selection, databases_tested )
-  labels <- prepare_labels(cat_sub, df_ora, communities)
-  
-  
-  
-  g_figure <- ggraph::ggraph(layout_fr)  + 
-    ggraph::geom_edge_link(edge_colour = 'black') +
-    ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
-    ggplot2::theme_bw()
-  
-  g_figure <- g_figure + 
-    ggplot2::scale_color_discrete(
-      name   = "Top significant gene set from each database",
-      labels = labels
-    )
-  
-```
-
-
-
-
-```{r run ORA analysis, include=FALSE}
-
-
-
-db_gobp <- get_database("gobp")
-
-n <- length(db_gobp)
-#if(F){
-overlap_matrix1 <- matrix(0, nrow=n, ncol=n)
-overlap_matrix2 <- matrix(0, nrow=n, ncol=n)
-  
-for( i in 1:length(db_gobp)){
-  
-  list_of_genes_1 <- db_gobp[[i]]
-
-  for( j in 1:length(db_gobp)){
-    
-    list_of_genes_2 <- db_gobp[[j]]
-
-    overlap_matrix1[i, j] <- length(intersect(list_of_genes_1, list_of_genes_2))/(min(c(length(list_of_genes_1),  length(list_of_genes_2))))
-    overlap_matrix2[i, j] <- length(intersect(list_of_genes_1, list_of_genes_2))/length(unique(c(list_of_genes_1, list_of_genes_2)))
-    
-  }
-}
-
-  
-  M_min <- as.data.frame(overlap_matrix1)
-  M_jac <- as.data.frame(overlap_matrix2)
-    
-  saveRDS(M_min, file = ".../examples/M_all_gobp_min.rds")
-  saveRDS(M_jac, file = ".../examples/M_all_gobp_jac.rds")
-
-#}
-
-
-ph_jac <- pheatmap::pheatmap(M_jac)
-
-M_tri <- M_min * upper.tri(M_min)
-  
-v <- apply(M_tri, 1, function(x) {
-    vals <- sort(x, decreasing = TRUE, na.last = NA)[1:1]
-     mean(vals, na.rm = TRUE)})
-
-
-
-  
-  
-  
-
-
-
-
-
-```
