@@ -38,10 +38,18 @@ keep <- labels != "\n\n" & !is.na(labels)
 
 g <- attr(layout_fr$layout, "graph")
 
-igraph::E(g)$linestyle <- factor(
-  igraph::E(g)$linestyle,
-  levels = c( "solid", "dashed" )
-)
+if(is.null(igraph::edge_attr(g, "linestyle"))){
+  
+  igraph::E(g)$linestyle <- "solid"
+  
+} else {
+  
+  igraph::E(g)$linestyle <- factor(
+    igraph::E(g)$linestyle,
+    levels = c("solid", "dashed")
+  )
+  
+}
 
 attr(layout_fr$layout, "graph") <- g
 
