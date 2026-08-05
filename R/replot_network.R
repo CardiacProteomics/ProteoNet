@@ -60,7 +60,7 @@ highlight <- NULL
 if(length(highlight)>0){
 
   g_figure <- ggraph::ggraph(layout_fr) +
-    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = as.character(linestyle))) +
+    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
     ggraph::scale_edge_linetype_manual(
       name   = "Edge type",
       breaks = c("solid", "dashed"),
@@ -100,7 +100,7 @@ if(length(highlight)>0){
 
 }else{
   g_figure <- ggraph::ggraph(layout_fr$layout)  +
-    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = as.character(linestyle))) +
+    ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
     ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
     ggplot2::theme_bw()
 
