@@ -41,8 +41,8 @@ place_singletons <- function( df_out, interactions, mapped_proteins, min_score )
 
     # NEW: apply score threshold
     interactions_filtered <- interactions_filtered[
-      !is.na(interactions_filtered$score) &
-        interactions_filtered$score >= min_score,
+      !is.na(interactions_filtered$alternative_score ) &
+        interactions_filtered$alternative_score >= min_score,
     ]
 
 
@@ -51,10 +51,10 @@ place_singletons <- function( df_out, interactions, mapped_proteins, min_score )
     }
 
 
-    ind_max <- which.max(interactions_filtered$score)
+    ind_max <- which.max(interactions_filtered$alternative_score )
 
 
-    score <- ifelse(length(ind_max)>0, interactions_filtered$score[ind_max], NA)
+    score <- ifelse(length(ind_max)>0, interactions_filtered$alternative_score [ind_max], NA)
     connection_to <- ifelse(length(ind_max)>0, interactions_filtered$to[ind_max], NA)
     connection_from <- ifelse(length(ind_max)>0, interactions_filtered$from[ind_max], NA)
 
