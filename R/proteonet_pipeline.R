@@ -48,7 +48,8 @@ proteonet_pipeline <- function( reference,
                  universe,
                  threshold_mean,
                  threshold_min, 
-                  min_score
+                  min_score, 
+                  subnetwork_method        
                  ){
 
 
@@ -59,7 +60,8 @@ proteonet_pipeline <- function( reference,
   out_cn <- construct_network( out_ii$interactions,
                                min_cluster_size,
                                score_threshold,
-                               out_ii$mapped_proteins )
+                               out_ii$mapped_proteins, 
+                               subnetwork_method)
 
   df_asm <- assign_subnetwork_membership(genes_drawn,
                                          out_ii$interactions,
