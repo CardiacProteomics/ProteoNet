@@ -1,72 +1,102 @@
-#' Construct and identify subnetworks from protein interactions
+#' Run the ProteoNet analysis pipeline
 #'
-#' Builds a protein-protein interaction graph from a set of interactions,
-#' filters edges by confidence score, removes small connected components,
-#' and partitions the remaining graph into subnetworks.
+#' Executes the full ProteoNet workflow for a set of input proteins,
+#' including network construction, subnetwork detection, enrichment analysis,
+#' redundancy reduction, and visualization.
 #'
-#' Subnetworks are defined either by Louvain community detection
-#' (\code{method = "louvain"}), which may split a component into several
-#' communities, or by the connected components themselves
-#' (\code{method = "connected"}), in which case each component is one cluster.
+#' The pipeline integrates STRING-based interaction networks with
+#' over-representation analysis (ORA) to provide interpretable biological
+#' context for significant protein hits.
 #'
-#' @param interactions object of protein-protein interactions with columns
-#'   \code{from}, \code{to}, and \code{score}
-#' @param min_cluster_size Minimum number of nodes required to retain a connected component
-#' @param score_threshold Minimum interaction score to retain an edge
-#' @param mapped_proteins Data frame mapping STRING IDs to protein identifiers
-#' @param method Clustering method: \code{"louvain"} (default) or \code{"connected"}
+#' @param reference Character string used to label output files
+#' @param genes_drawn Character vector of proteins/genes of interest
+#' @param species Numeric species identifier (e.g. 9606 for Homo sapiens)
+#' @param min_cluster_size Minimum size of subnetworks to retain
+#' @param score_threshold Minimum interaction score for network edges
+#' @param selection Method for selecting representative enrichment terms
+#' @param databases_tested List of gene set databases to use
+#' @param ora_min Minimum gene set size for ORA
+#' @param ora_max Maximum gene set size for ORA
+#' @param folder_databases Path to gene set database files
+#' @param folder_results Path to save enrichment results
+#' @param folder_figures Path to save generated figures
 #'
-#' @return A list with the following elements:
+#' @return A list containing:
 #' \describe{
-#'   \item{graph}{An igraph object of the filtered interaction network}
-#'   \item{communities}{A \code{communities} object describing the partition}
-#'   \item{method}{The clustering method used}
+#'   \item{plots}{Network plots (with and without labels)}
+#'   \item{enrichment}{ORA results (combined across subnetworks)}
+#'   \item{network}{Graph object with subnetworks and singleton integration}
 #' }
 #'
 #' @export
 
-construct_network <- function(interactions, min_cluster_size, score_threshold,
-                              mapped_proteins,
-                              method = c("louvain", "connected")) {
 
-  method <- match.arg(method)
 
-  interactions <- interactions[interactions$score >= score_threshold, ]
+proteonet_pipeline <- function( reference,
+                 genes_drawn,
+                 species,
+                 min_cluster_size,
+                 score_threshold,
+                 selection,
+                 databases_tested,
+                 ora_min,
+                 ora_max,
+                 folder_string,
+                 folder_genesets,
+                 folder_results,
+                 folder_figures,
+                 universe,
+                 threshold_mean,
+                 threshold_min, 
+                  min_score
+                 ){
 
-  edges <- interactions |> dplyr::select(from = from, to = to, score = score)
 
-  interaction_graph <- tidygraph::tbl_graph(edges = edges, directed = FALSE)
+  out_ii <- identify_interactions( genes_drawn,
+                                   folder_string,
+                                   species )
 
-  igraph::E(interaction_graph)$linestyle <- "solid"
+  out_cn <- construct_network( out_ii$interactions,
+                               min_cluster_size,
+                               score_threshold,
+                               out_ii$mapped_proteins )
 
-  comp <- igraph::components(interaction_graph)
+  df_asm <- assign_subnetwork_membership(genes_drawn,
+                                         out_ii$interactions,
+                                         out_cn$communities,
+                                         out_ii$mapped_proteins)
 
-  big_comps <- which(comp$csize >= min_cluster_size)
+  df_ps <- place_singletons(  df_asm,
+                              out_ii$interactions,
+                              out_ii$mapped_proteins, 
+                              min_score )
 
-  interaction_graph_filtered <- igraph::induced_subgraph(
-    interaction_graph,
-    vids = igraph::V(interaction_graph)[comp$membership %in% big_comps]
-  )
+  out_astg <- add_singletons_to_graph(out_cn$graph,
+                                      df_ps,
+                                      df_asm,
+                                      out_ii$mapped_proteins)
 
-  communities <- switch(
-    method,
-    louvain = igraph::cluster_louvain(interaction_graph_filtered),
-    connected = {
-      comp_filtered <- igraph::components(interaction_graph_filtered)
-      igraph::make_clusters(
-        interaction_graph_filtered,
-        membership = comp_filtered$membership,
-        algorithm  = "connected components",
-        modularity = TRUE
-      )
-    }
-  )
 
-  igraph::V(interaction_graph_filtered)$community <- igraph::membership(communities)
+  df_gcr <- get_community_representatives( out_astg$layout,
+                                           universe,
+                                           selection,
+                                           databases_tested,
+                                           threshold_mean,
+                                           threshold_min,
+                                           ora_min,
+                                           ora_max,
+                                           folder_genesets)
 
-  return(list(
-    graph = interaction_graph_filtered,
-    communities = communities,
-    method = method
-  ))
+
+  write.csv(df_gcr, file = paste0(folder_results, "/overrepresentation_analysis_alt_", reference, ".csv"))
+  labels <- prepare_labels(out_astg$layout, df_gcr)
+
+  plots <- produce_network_plot( out_astg$layout, labels)
+
+  ggplot2::ggsave(plots$network_figure, file = paste0(folder_figures, "/network_figure_", reference, ".png"))
+  ggplot2::ggsave(plots$network_figure_labels, file = paste0(folder_figures, "/network_figure_labels_", reference, ".png"))
+
+  return(list(ORA_analysis = df_gcr, network = out_astg, labels = labels))
 }
+
+
