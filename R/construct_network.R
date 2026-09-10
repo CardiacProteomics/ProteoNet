@@ -53,13 +53,15 @@ construct_network <- function(interactions, min_cluster_size, score_threshold,
     louvain = igraph::cluster_louvain(interaction_graph_filtered),
     connected = {
       comp_filtered <- igraph::components(interaction_graph_filtered)
-      igraph::make_clusters(
+      cl <- igraph::make_clusters(
         interaction_graph_filtered,
-        membership = comp_filtered$membership,
+        membership = as.numeric(comp_filtered$membership),
         algorithm  = "connected components",
-        modularity = TRUE
-      )
-    }
+        modularity = FALSE
+        )
+        cl$names <- igraph::V(interaction_graph_filtered)$name
+        cl
+      }
   )
 
   igraph::V(interaction_graph_filtered)$community <- igraph::membership(communities)
