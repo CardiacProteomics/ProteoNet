@@ -99,8 +99,14 @@ if(length(highlight)>0){
 
 
 }else{
-  g_figure <- ggraph::ggraph(layout_fr$layout)  +
+  g g_figure <- ggraph::ggraph(layout_fr$layout)  +
     ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
+    ggraph::scale_edge_linetype_manual(
+      name   = "Edge type",
+      breaks = c("solid", "dashed"),
+      values = c(solid = "solid", dashed = "dashed"),
+      labels = c(solid = "Network", dashed = "Singleton")
+    ) +
     ggraph::geom_node_point(ggplot2::aes(color = as.factor(community)), size = 5) +
     ggplot2::theme_bw()
 
