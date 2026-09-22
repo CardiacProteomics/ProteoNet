@@ -99,7 +99,7 @@ if(length(highlight)>0){
 
 
 }else{
-  g g_figure <- ggraph::ggraph(layout_fr$layout)  +
+  g_figure <- ggraph::ggraph(layout_fr$layout)  +
     ggraph::geom_edge_link(edge_colour = "black", ggplot2::aes(edge_linetype = linestyle)) +
     ggraph::scale_edge_linetype_manual(
       name   = "Edge type",
